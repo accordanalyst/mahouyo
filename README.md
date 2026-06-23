@@ -1,49 +1,49 @@
 # ✩ Mahou Amp ✩
 
-A magical-girl-themed, Winamp-inspired music player widget — pastel gradients, twinkling stars, a scrolling marquee display, and a scrollable playlist. Built as an SVG (for static display, like a GitHub README) and as a fully interactive HTML version (for actual use).
+I built this because I wanted a Winamp-style player on my GitHub that was reminscent of fun, easier times and had at least the essence of the magical-girl aesthetic. It comes in two versions: a static image you can drop straight into a README, and a fully working interactive player that actually plays music. Still surprising to me.
 
 ![Mahou Amp preview](./mahou-amp-player.svg)
 
 ---
 
-## What's Inside
+## What's in here
 
-| File | What it's for |
+| File | What it does |
 |---|---|
-| `mahou-amp-player.svg` | A **static** image of the player. This is what renders inside GitHub READMEs, since GitHub strips out `<script>` and most interactivity from Markdown-rendered HTML. |
-| `mahou_amp_player.html` | The **fully interactive** version — real play/pause state, a clickable and scrollable playlist, draggable seek and volume sliders. Open this directly in a browser, or host it (GitHub Pages, your own site, etc.) and link to it. |
+| `mahou-amp-player.svg` | The static version. This is what shows up if you drop it into a README — GitHub doesn't let Markdown run JavaScript, so this is just a picture of the player. |
+| `mahou_amp_player.html` | The real one. Buttons work, playlist scrolls, music actually plays. Open it in a browser, or host it somewhere and link to it. |
 
-**Why two files?** GitHub READMEs only render static content — images, not live JavaScript. The SVG is what shows up *inside* your README. The HTML file is the real, working player; it just can't run embedded in the README itself.
-
----
-
-## Features
-
-- Pastel gradient shell with twinkling star decorations
-- Scrolling "now playing" marquee in the LCD display
-- Animated 10-bar equalizer that pauses/resumes with playback
-- Spinning sparkle disc that spins only while a track is "playing"
-- Click-to-select playlist — selecting a track updates the display, marquee, and now-playing highlight
-- **Scrollable playlist** — the playlist holds more tracks than fit on screen at once; scroll with your mouse wheel, or click-and-drag inside the playlist panel. A small pink scrollbar thumb on the right edge tracks your position.
-- Draggable seek bar and volume slider
-- **Real playback, real durations** — the interactive version is wired to actual YouTube videos via the YouTube IFrame Player API. Track lengths shown in the playlist are pulled live from YouTube, not typed in by hand (see [A Note on Track Durations](#a-note-on-track-durations) below for how that works).
+**Why two files?** GitHub READMEs can only show static stuff — images, not live scripts. So the SVG is what people actually *see* in the README, and the HTML file is where the real functionality lives. I just can't make the interactive one run embedded directly inside the README itself — that's a GitHub limitation, not something I can code around.
 
 ---
 
-## A Note on Track Durations
+## What it does
 
-The static SVG (`mahou-amp-player.svg`) shows **hand-typed placeholder durations** — they're just text, not real data, since an SVG can't talk to YouTube.
-
-The interactive version pulls **real durations from YouTube itself**, which comes with one quirk worth knowing: YouTube's player only reports a video's length *after* that specific video has been loaded at least once. Left as the simplest possible implementation, that would mean only the very first track shows a real time on page load, and the rest would show `--:--` until you'd clicked into each one — a visible downgrade from the static version, where all 9 times are just always there (even if fake).
-
-To avoid that, the interactive version silently cues every track in the playlist once in the background the moment the player is ready — no sound, no visible playback, just enough to ask YouTube "how long is this?" — then restores whichever track you actually have selected. The practical effect: all 9 real durations populate within a second or two of the page loading, same as the static version felt, except now they're accurate instead of placeholder text.
+- Pastel gradient shell, twinkly star decorations, the whole vibe
+- Scrolling "now playing" marquee in the little LCD screen
+- A 10-bar equalizer that animates while something's playing and freezes when it's paused
+- A spinning sparkle disc, same deal — only spins while playing
+- Click any track in the playlist to jump straight to it
+- The playlist actually scrolls now (mouse wheel or click-and-drag) since I've got more tracks than fit on screen at once — there's a little pink scrollbar thumb on the side so you can see where you are
+- Seek bar and volume slider you can actually drag
+- It plays real songs. I wired it up to YouTube under the hood, so when you hit play, you're hearing the actual track, not a fake animation pretending to be one
 
 ---
 
-## How to Embed the Static Version (e.g. in a GitHub README)
+## Quick heads up about the track times
 
-1. Add `mahou-amp-player.svg` to your repository.
-2. In your `README.md`, reference it as an image:
+So.... the static SVG version has made-up durations. I just typed the numbers in because it's a flat image and has no way to know how long a song actually is.
+
+The interactive version pulls real durations straight from YouTube, which meant dealing with a quirk: YouTube only tells you how long a video is *after* it's been loaded at least once. So if I'd done the lazy version, you'd see the real time for whatever's currently playing and `--:--` for every other track until you clicked into it. That felt like a downgrade from the static version where all 9 times are just sitting there.
+
+So instead, the second the player's ready, it quietly loads every track in the background — no sound, nothing visible happening — just enough to ask YouTube "how long is this one?" for all nine, then snaps back to whatever track I actually had selected. End result: all the times show up within a second or two, same as the static version felt, except now they're real instead of made up.
+
+---
+
+## Using the static version (like in a README)
+
+1. Drop `mahou-amp-player.svg` into your repo.
+2. Reference it like any other image in your `README.md`:
 
 ```markdown
 <p align="center">
@@ -51,30 +51,30 @@ To avoid that, the interactive version silently cues every track in the playlist
 </p>
 ```
 
-That's it — no setup, no dependencies. It's just an image, so it works anywhere Markdown images work (READMEs, wikis, Discord embeds via a raw GitHub link, etc.).
+That's it. It's just an image at that point, so it'll show up anywhere images normally render — READMEs, wikis, you name it.
 
-> **Note:** because it's a static image, the playlist won't actually scroll and the buttons won't respond to clicks in this version — for that, see below.
+> Heads up: since it's a static image, nothing's actually clickable here. The buttons and scrolling are just for show. For the real thing, keep reading.
 
 ---
 
-## How to Use the Interactive Version
+## Using the interactive version
 
-1. Download `mahou_amp_player.html`.
-2. Double-click it, or drag it into a browser tab — no install, no build step.
-3. Everything works immediately, with real audio playing from YouTube:
-   - Click ▶ / ⏸ / ◀ / ▶▶ to control actual playback
-   - Click any track in the playlist to load and play it
-   - Scroll or drag inside the playlist to browse all 9 tracks
-   - Drag the seek bar to jump to a real point in the video; drag the volume slider to control real volume
+1. Grab `mahou_amp_player.html`.
+2. Double-click it or drag it into a browser tab — no installs, no setup.
+3. From there it's just... a working music player:
+   - ▶ / ⏸ / ◀ / ▶▶ actually control playback
+   - Clicking a track loads and plays it
+   - Scroll or drag through the playlist to see all 9 tracks
+   - Drag the seek bar to jump around in the song, drag the volume slider to control how loud it is
 
-Playback requires an internet connection (it's loading real YouTube videos in the background) and a browser that allows the YouTube IFrame API — works in any modern desktop or mobile browser.
+You do need an internet connection for this one since it's streaming from YouTube in the background, but it'll run in basically any modern browser, desktop or mobile.
 
-If you want this reachable from a link (instead of a downloaded file), host it with **GitHub Pages**:
+If you want people to be able to click a link instead of downloading a file, GitHub Pages is the easy way to host it:
 
-1. In your repo settings, enable GitHub Pages (e.g. serving from `main` branch, root or `/docs`).
-2. Place `mahou_amp_player.html` in the published folder.
-3. Visit `https://yourusername.github.io/your-repo/mahou_amp_player.html`.
-4. Link to that URL from your README:
+1. Turn on GitHub Pages in your repo settings.
+2. Drop `mahou_amp_player.html` wherever Pages is serving from.
+3. It'll be live at `https://yourusername.github.io/your-repo/mahou_amp_player.html`.
+4. Link to it from your README:
 
 ```markdown
 🎧 [Open the interactive player](https://yourusername.github.io/your-repo/mahou_amp_player.html)
@@ -82,11 +82,11 @@ If you want this reachable from a link (instead of a downloaded file), host it w
 
 ---
 
-## Using Your Own Tracks
+## Swapping in your own tracks
 
-### Option A: YouTube (built in by default)
+### YouTube (this is what it uses by default)
 
-The player is already wired to YouTube via the YouTube IFrame Player API. To swap in your own tracks, edit the `tracks` array near the top of the `<script>` block:
+Just edit the `tracks` array near the top of the `<script>` section:
 
 ```js
 var tracks = [
@@ -95,11 +95,11 @@ var tracks = [
 ];
 ```
 
-The `videoId` is the part after `watch?v=` in any YouTube URL (e.g. `https://www.youtube.com/watch?v=nCgOhvZ7AaA` → `nCgOhvZ7AaA`). Durations are fetched automatically — see [A Note on Track Durations](#a-note-on-track-durations) above — so you never need to type a duration by hand.
+The `videoId` is just the part after `watch?v=` in any YouTube link — so `youtube.com/watch?v=nCgOhvZ7AaA` gives you `nCgOhvZ7AaA`. Don't bother typing in durations, they pull automatically (see above for why that took a little extra work).
 
-### Option B: Your own local audio files
+### Your own local files instead
 
-If you'd rather play your own hosted `.mp3`/`.wav` files instead of YouTube, swap the YouTube wiring for a plain HTML5 `<audio>` element:
+If you'd rather host your own `.mp3`s than pull from YouTube, swap the YouTube wiring out for a plain `<audio>` tag:
 
 ```html
 <audio id="audioEl" preload="auto"></audio>
@@ -117,7 +117,7 @@ document.getElementById('btnPause').addEventListener('click', function(){
 
 function loadTrack(i){
   current = i;
-  audioEl.src = tracks[i].file; // e.g. "songs/midnight-blue.mp3"
+  audioEl.src = tracks[i].file; // like "songs/midnight-blue.mp3"
   audioEl.play();
   playing = true;
   updateAll();
@@ -136,27 +136,27 @@ audioEl.addEventListener('loadedmetadata', function(){
 });
 ```
 
-A few practical notes if you go this route:
+Couple things to know if you go this route:
 
-- You'll need to **host your own audio files** — this project doesn't include or distribute any actual song files. Make sure you have the rights to use whatever audio you add (your own recordings, royalty-free tracks, or music you're licensed to use).
-- For volume, set `audioEl.volume = clamped / 100` inside the existing `setVol()` function.
-- The equalizer bars and spinning disc are just CSS animations tied to a `playing` boolean — they don't analyze real audio frequency data. For a true audio-reactive equalizer, look into the Web Audio API's `AnalyserNode`.
+- You're on your own for hosting the actual audio files.
+- Volume control: set `audioEl.volume = clamped / 100` inside `setVol()`.
+- The equalizer and spinning disc are just animations tied to whether something's "playing" — they're not actually reacting to the audio's real frequencies. If you want a *true* audio-reactive equalizer, look into the Web Audio API's `AnalyserNode` — that's the real way to get bars that move with the actual sound.
 
-### Option C: SoundCloud
+### SoundCloud
 
-SoundCloud has its own Widget JS API with a similar shape to YouTube's (play/pause/seek/events), so the same general pattern used for YouTube can be adapted to SoundCloud track URLs. Not wired in by default in this build, but straightforward to add if needed.
+SoundCloud's got a Widget API that works pretty similarly to YouTube's (play/pause/seek/events), so the same overall approach would carry over fine. I haven't wired it in here, but it wouldn't take much to add.
 
-### A note on Spotify
+### Spotify (the annoying one)
 
-Spotify is the odd one out. Getting the same level of custom control shown here (play/pause/seek driven by *your own* buttons) requires the Spotify **Web Playback SDK**, which needs a Spotify Premium account and an OAuth login flow — it can't play from a plain public link the way YouTube/SoundCloud can. The simpler alternative (`open.spotify.com/embed/track/...`) gives you Spotify's own stock player UI in an iframe, but that UI is Spotify's, not this one — your custom buttons can't drive it.
+Spotify's the odd one out. Getting this same level of control — my own buttons actually driving playback — needs their Web Playback SDK, which means a Premium account and an OAuth login flow. It can't just play off a public link like YouTube or SoundCloud can. You *can* drop in their basic embed (`open.spotify.com/embed/track/...`), but that gives you Spotify's own player UI sitting in an iframe — my buttons wouldn't be able to touch it.
 
 ---
 
-## Customizing
+## Making it your own
 
-- **Playlist tracks**: edit the `tracks` array near the top of the `<script>` block in `mahou_amp_player.html`. Each entry needs `artist`, `title`, and `videoId` (durations are fetched automatically — don't add them by hand).
-- **Colors**: all gradients are defined once in the `<defs>` block at the top of the SVG (`#frame`, `#titlebar`, `#lcd`, `#barglow`) — change the `stop-color` values there to retheme the whole player.
-- **Number of visible playlist rows**: controlled by `VIEW_H` in the script (currently `190`, enough for about 4–5 rows before scrolling kicks in).
+- **Tracks**: edit the `tracks` array — just needs `artist`, `title`, and `videoId`. Skip the duration, it's automatic.
+- **Colors**: all the gradients live in one `<defs>` block at the top of the SVG (`#frame`, `#titlebar`, `#lcd`, `#barglow`) — change those `stop-color` values to retheme the whole thing.
+- **How many tracks show at once**: there's a `VIEW_H` variable in the script (currently `190`) that controls how tall the visible playlist window is before it starts scrolling.
 
 ---
 
