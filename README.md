@@ -32,7 +32,7 @@ I built this because I wanted a Winamp-style player on my GitHub that was remins
 
 ## Quick heads up about the track times
 
-So.... the static SVG version has made-up durations. I just typed the numbers in because it's a flat image and has no way to know how long a song actually is.
+Funny story — the static SVG version has made-up durations. I just typed numbers in because it's a flat image and has no way to know how long a song actually is.
 
 The interactive version pulls real durations straight from YouTube, which meant dealing with a quirk: YouTube only tells you how long a video is *after* it's been loaded at least once. So if I'd done the lazy version, you'd see the real time for whatever's currently playing and `--:--` for every other track until you clicked into it. That felt like a downgrade from the static version where all 9 times are just sitting there.
 
@@ -59,26 +59,57 @@ That's it. It's just an image at that point, so it'll show up anywhere images no
 
 ## Using the interactive version
 
-1. Grab `mahou_amp_player.html`.
-2. Double-click it or drag it into a browser tab — no installs, no setup.
-3. From there it's just... a working music player:
-   - ▶ / ⏸ / ◀ / ▶▶ actually control playback
-   - Clicking a track loads and plays it
-   - Scroll or drag through the playlist to see all 9 tracks
-   - Drag the seek bar to jump around in the song, drag the volume slider to control how loud it is
+**Heads up before you do anything else:** this player streams real audio from YouTube, and that specifically does **not** work if you just double-click the HTML file and open it straight from your file system. Here's why, and how to actually run it — read this part first, it'll save you some confusion.
 
-You do need an internet connection for this one since it's streaming from YouTube in the background, but it'll run in basically any modern browser, desktop or mobile.
+### Why double-clicking the file won't play anything
 
-If you want people to be able to click a link instead of downloading a file, GitHub Pages is the easy way to host it:
+When you open an HTML file directly from your computer, your browser loads it as a `file://` address. Browsers treat every `file://` page as its own locked-down security origin — and the YouTube IFrame API needs to talk back and forth with your page to actually initialize the player. That handshake gets blocked outright on a `file://` page, so the player UI shows up fine, but pressing play does nothing. No crash, no obvious error — it just silently never finishes loading.
+
+If you open your browser's console (F12 → Console) while this is happening, you'll see something like:
+
+```
+Unsafe attempt to load URL file:///... from frame with URL file:///...
+'file:' URLs are treated as unique security origins.
+```
+
+That message is the browser confirming exactly this — it's not a bug in the code, it's a security boundary that has nothing to do with what's written in the file.
+
+### How to actually run it
+
+**Option 1 — GitHub Pages (the real fix, and how you'll actually share this):**
 
 1. Turn on GitHub Pages in your repo settings.
-2. Drop `mahou_amp_player.html` wherever Pages is serving from.
-3. It'll be live at `https://yourusername.github.io/your-repo/mahou_amp_player.html`.
-4. Link to it from your README:
+2. Drop `mahou_amp_player.html` (or `index.html`) wherever Pages is serving from.
+3. It'll be live at `https://yourusername.github.io/your-repo/`.
+4. Once it's loading from that `https://` address instead of `file://`, the origin restriction is gone and playback works normally — no code changes needed, it's purely about how the page is being served.
 
 ```markdown
 🎧 [Open the interactive player](https://yourusername.github.io/your-repo/mahou_amp_player.html)
 ```
+
+**Option 2 — a quick local server, for testing changes before you push:**
+
+If you don't want to push to GitHub every time you tweak something, serve the folder locally instead of double-clicking the file. On Windows:
+
+1. Open the folder containing the HTML file in File Explorer.
+2. Click into the address bar at the top, type `cmd`, hit Enter — this opens a terminal already pointed at that folder.
+3. Run:
+   ```
+   python -m http.server 8000
+   ```
+   (If that's not recognized, try `py -m http.server 8000` instead.)
+4. Leave that terminal open, then visit `http://localhost:8000/mahou_amp_player.html` in your browser.
+
+Either option gives you a real `http(s)://` origin instead of `file://`, which is the only thing that actually matters here.
+
+### Once it's actually running
+
+1. ▶ / ⏸ / ◀ / ▶▶ actually control playback
+2. Clicking a track loads and plays it
+3. Scroll or drag through the playlist to see all 9 tracks
+4. Drag the seek bar to jump around in the song, drag the volume slider to control how loud it is
+
+You'll need an internet connection either way, since it's streaming from YouTube in the background — but once it's served properly, it runs in basically any modern browser, desktop or mobile.
 
 ---
 
@@ -138,7 +169,7 @@ audioEl.addEventListener('loadedmetadata', function(){
 
 Couple things to know if you go this route:
 
-- You're on your own for hosting the actual audio files.
+- You're on your own for hosting the actual audio files — I'm not shipping any songs with this. Use your own stuff or anything you're actually licensed to use.
 - Volume control: set `audioEl.volume = clamped / 100` inside `setVol()`.
 - The equalizer and spinning disc are just animations tied to whether something's "playing" — they're not actually reacting to the audio's real frequencies. If you want a *true* audio-reactive equalizer, look into the Web Audio API's `AnalyserNode` — that's the real way to get bars that move with the actual sound.
 
