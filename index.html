@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>✩ Mahou Amp ✩</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box; user-select:none;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#FFE3F1,#E9D5FF); font-family:Verdana, sans-serif;
+  }
+  .stage{width:320px; height:430px; position:relative;}
+  svg{width:100%; height:100%; overflow:visible;}
+
+  .twinkle{animation:tw 2.4s ease-in-out infinite;}
+  .twinkle.d2{animation-delay:.6s;}
+  .twinkle.d3{animation-delay:1.2s;}
+  .twinkle.d4{animation-delay:1.8s;}
+  @keyframes tw{0%,100%{opacity:.25; transform:scale(0.8);} 50%{opacity:1; transform:scale(1.15);}}
+
+  .marquee{animation:scroll 7s linear infinite;}
+  @keyframes scroll{0%{transform:translateX(0);} 45%{transform:translateX(-180px);} 50%{transform:translateX(-180px);} 95%{transform:translateX(0);} 100%{transform:translateX(0);}}
+
+  .bar{transform-box:fill-box; transform-origin:bottom; animation:eq 1.1s ease-in-out infinite;}
+  .bar.paused{animation-play-state:paused; transform:scaleY(0.2) !important;}
+  .b1{animation-duration:.9s;} .b2{animation-duration:1.3s; animation-delay:.1s;}
+  .b3{animation-duration:1.0s; animation-delay:.25s;} .b4{animation-duration:1.4s; animation-delay:.05s;}
+  .b5{animation-duration:.8s; animation-delay:.3s;} .b6{animation-duration:1.2s; animation-delay:.15s;}
+  .b7{animation-duration:1.05s; animation-delay:.35s;} .b8{animation-duration:1.25s; animation-delay:.2s;}
+  .b9{animation-duration:.95s; animation-delay:.1s;} .b10{animation-duration:1.15s; animation-delay:.28s;}
+  @keyframes eq{0%,100%{transform:scaleY(0.25);} 50%{transform:scaleY(1);}}
+
+  .nowplaying-glow{animation:glow 1.8s ease-in-out infinite;}
+  @keyframes glow{0%,100%{opacity:.55;} 50%{opacity:1;}}
+
+  .spin{animation:spin 6s linear infinite; transform-box:fill-box; transform-origin:center;}
+  .spin.paused{animation-play-state:paused;}
+  @keyframes spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+
+  .tbtn{cursor:pointer; transition:transform .15s ease; transform-box:fill-box; transform-origin:center;}
+  .tbtn:hover{transform:scale(1.06);}
+  .track-row{cursor:pointer;}
+  .seek-handle, .vol-handle{cursor:grab;}
+</style>
+</head>
+<body>
+<div class="stage">
+<div id="ytHiddenPlayer" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;"></div>
+<svg viewBox="0 0 320 430" font-family="Verdana, sans-serif">
+<defs>
+  <linearGradient id="frame" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#F6C9E0"/><stop offset="50%" stop-color="#D9B8F0"/><stop offset="100%" stop-color="#B9CFFA"/>
+  </linearGradient>
+  <linearGradient id="titlebar" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#FF8FC4"/><stop offset="100%" stop-color="#A98CF0"/>
+  </linearGradient>
+  <linearGradient id="lcd" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#241636"/><stop offset="100%" stop-color="#160E22"/>
+  </linearGradient>
+  <linearGradient id="barglow" x1="0%" y1="100%" x2="0%" y2="0%">
+    <stop offset="0%" stop-color="#FF9FD6"/><stop offset="55%" stop-color="#C9A6FF"/><stop offset="100%" stop-color="#8FE3FF"/>
+  </linearGradient>
+  <filter id="softshadow" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/>
+  </filter>
+  <clipPath id="playlistClip"><rect x="18" y="200" width="284" height="190"/></clipPath>
+</defs>
+
+<rect x="2" y="2" width="316" height="426" rx="14" fill="url(#frame)" stroke="#7A5FA8" stroke-width="2" filter="url(#softshadow)"/>
+
+<rect x="10" y="10" width="300" height="24" rx="6" fill="url(#titlebar)"/>
+<text x="22" y="27" fill="#FFFFFF" font-size="12" font-weight="bold" letter-spacing="1">✩ MAHOU AMP ✩</text>
+<circle cx="278" cy="22" r="5" fill="#FFFFFF" opacity="0.85"/>
+<circle cx="293" cy="22" r="5" fill="#FFFFFF" opacity="0.85"/>
+<text x="278" y="25" font-size="9" fill="#A98CF0" text-anchor="middle">_</text>
+<text x="293" y="25.5" font-size="8" fill="#A98CF0" text-anchor="middle">x</text>
+
+<rect x="18" y="42" width="284" height="58" rx="6" fill="url(#lcd)" stroke="#5C3FA0" stroke-width="2"/>
+
+<clipPath id="clip1"><rect x="26" y="50" width="180" height="14"/></clipPath>
+<g clip-path="url(#clip1)">
+  <text class="marquee" id="marqueeText" x="26" y="61" fill="#FFB6E6" font-size="12" font-weight="bold">♪ Megumi Hayashibara — Midnight Blue ♪&#160;&#160;&#160;&#160;&#160;&#160;</text>
+</g>
+
+<text x="26" y="80" fill="#9FE9FF" font-size="9" id="timeText">--:-- / --:--</text>
+<text x="220" y="80" fill="#C9A6FF" font-size="9">128kbps ☆ 44kHz</text>
+
+<g id="eqBars">
+  <rect class="bar b1" x="226" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b2" x="233" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b3" x="240" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b4" x="247" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b5" x="254" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b6" x="261" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b7" x="268" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b8" x="275" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b9" x="282" y="50" width="5" height="14" fill="url(#barglow)"/>
+  <rect class="bar b10" x="289" y="50" width="5" height="14" fill="url(#barglow)"/>
+</g>
+
+<text class="twinkle" x="20" y="46" font-size="9" fill="#FFE9A8">✦</text>
+<text class="twinkle d2" x="295" y="96" font-size="9" fill="#FFE9A8">✦</text>
+<text class="twinkle d3" x="14" y="120" font-size="8" fill="#FFD6F0">✧</text>
+<text class="twinkle d4" x="305" y="40" font-size="8" fill="#FFD6F0">✧</text>
+
+<rect x="18" y="108" width="284" height="8" rx="4" fill="#3A2860"/>
+<rect x="18" y="108" width="0" height="8" rx="4" fill="url(#barglow)" id="seekFill"/>
+<circle class="seek-handle" cx="18" cy="112" r="6" fill="#FFFFFF" stroke="#A98CF0" stroke-width="2" id="seekHandle"/>
+
+<g filter="url(#softshadow)">
+  <g class="tbtn" id="btnPrev">
+    <circle cx="40" cy="138" r="14" fill="#FFFFFF" stroke="#D89FE8" stroke-width="2"/>
+    <path d="M45,131 L34,138 L45,145 Z" fill="#B07AD0"/>
+  </g>
+
+  <g class="tbtn" id="btnPlay">
+    <circle cx="76" cy="138" r="16" fill="#FF8FC4" stroke="#FFFFFF" stroke-width="2"/>
+    <path id="playIcon" d="M70,129 L70,147 L86,138 Z" fill="#FFFFFF"/>
+  </g>
+
+  <g class="tbtn" id="btnPause">
+    <circle cx="112" cy="138" r="14" fill="#FFFFFF" stroke="#D89FE8" stroke-width="2"/>
+    <rect x="107" y="131" width="4" height="14" fill="#B07AD0"/>
+    <rect x="115" y="131" width="4" height="14" fill="#B07AD0"/>
+  </g>
+
+  <g class="tbtn" id="btnNext">
+    <circle cx="148" cy="138" r="14" fill="#FFFFFF" stroke="#D89FE8" stroke-width="2"/>
+    <path d="M143,131 L154,138 L143,145 Z" fill="#B07AD0"/>
+  </g>
+</g>
+
+<g class="spin" id="spinDisc">
+  <circle cx="270" cy="138" r="16" fill="#2A1A40" stroke="#FFD6F0" stroke-width="2"/>
+  <circle cx="270" cy="138" r="4" fill="#FFE9A8"/>
+  <path d="M270,124 L272,134 L270,138 L268,134 Z" fill="#FFD6F0"/>
+</g>
+
+<text x="190" y="142" fill="#7A5FA8" font-size="9">VOL</text>
+<rect x="190" y="148" width="60" height="6" rx="3" fill="#3A2860"/>
+<rect x="190" y="148" width="42" height="6" rx="3" fill="url(#barglow)" id="volFill"/>
+<circle class="vol-handle" cx="232" cy="151" r="6" fill="#FFFFFF" stroke="#A98CF0" stroke-width="1.5" id="volHandle"/>
+
+<rect x="18" y="172" width="284" height="244" rx="8" fill="#FBF3FA" stroke="#C9A6E8" stroke-width="2"/>
+<rect x="18" y="172" width="284" height="26" rx="8" fill="url(#titlebar)"/>
+<text x="30" y="189" fill="#FFFFFF" font-size="11" font-weight="bold" id="playlistHeader">PLAYLIST ✩ 9 tracks</text>
+
+<g clip-path="url(#playlistClip)">
+  <g id="playlistRows"></g>
+</g>
+
+<rect x="296" y="202" width="4" height="184" rx="2" fill="#E8D6F2"/>
+<rect x="296" y="202" width="4" height="40" rx="2" fill="#FF8FC4" id="scrollThumb"/>
+
+<text x="30" y="404" font-size="9" fill="#B89FD8" id="shuffleText">✩ shuffle: off</text>
+<text x="120" y="404" font-size="9" fill="#B89FD8">repeat: playlist</text>
+<text x="230" y="404" font-size="9" fill="#B89FD8">9 tracks ✩</text>
+</svg>
+</div>
+
+<script>
+var tracks = [
+  {artist:"Megumi Hayashibara", title:"Midnight Blue", videoId:"nCgOhvZ7AaA"},
+  {artist:"Shadow Hearts Covenant", title:"Hardcore to the Brain", videoId:"AiFU-uSF1Yo"},
+  {artist:"Tekken 3", title:"Jin Kazama Theme", videoId:"QnfgNHK_VxY"},
+  {artist:"Emi Evans", title:"~ Kuroi Uta (International ver)", videoId:"C0vjpnhSxoo"},
+  {artist:"Final Fantasy VII OST", title:"Aerith's Theme", videoId:"tvxOd2W2xCI"},
+  {artist:"Final Fantasy VII OST", title:"One-Winged Angel", videoId:"mYdf0yqK_Fc"},
+  {artist:"Final Fantasy VII OST", title:"Cosmo Canyon", videoId:"pqO5h3-HFW8"},
+  {artist:"Final Fantasy VII OST", title:"J-E-N-O-V-A", videoId:"kQuBZcO0m7A"},
+  {artist:"Final Fantasy VII OST", title:"Cid's Theme", videoId:"TuqDb4ap--I"}
+];
+var current = 0;
+var playing = false;
+var ns = "http://www.w3.org/2000/svg";
+
+var ROW_H = 44;
+var VIEW_H = 190;
+var maxScroll = Math.max(0, tracks.length * ROW_H - VIEW_H);
+var scrollOffset = 0;
+
+var rowsEl = document.getElementById('playlistRows');
+var rowsGroup = rowsEl;
+
+function clampScroll(v){ return Math.max(0, Math.min(maxScroll, v)); }
+
+function applyScroll(){
+  rowsGroup.setAttribute('transform', 'translate(0,' + (-scrollOffset) + ')');
+  var thumb = document.getElementById('scrollThumb');
+  var trackH = 184;
+  var thumbH = Math.max(20, trackH * (VIEW_H / (tracks.length * ROW_H)));
+  var thumbY = 202 + (maxScroll === 0 ? 0 : (trackH - thumbH) * (scrollOffset / maxScroll));
+  thumb.setAttribute('height', thumbH);
+  thumb.setAttribute('y', thumbY);
+}
+
+function scrollToCurrent(){
+  var rowTop = current * ROW_H;
+  var rowBottom = rowTop + ROW_H;
+  if(rowTop < scrollOffset) scrollOffset = rowTop;
+  else if(rowBottom > scrollOffset + VIEW_H) scrollOffset = rowBottom - VIEW_H;
+  scrollOffset = clampScroll(scrollOffset);
+  applyScroll();
+}
+
+var durationCache = {}; // index -> "MM:SS" once known from the real player
+
+function fmtTime(sec){
+  if(!isFinite(sec) || sec < 0) return "--:--";
+  var m = Math.floor(sec / 60);
+  var s = Math.floor(sec % 60);
+  return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function renderPlaylist(){
+  rowsEl.innerHTML = '';
+  document.getElementById('playlistHeader').textContent = 'PLAYLIST ✩ ' + tracks.length + ' tracks';
+  tracks.forEach(function(t, i){
+    var top = 206 + i*44;
+    var g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', 'track-row');
+    var dur = durationCache[i] || "--:--";
+
+    if(i === current){
+      g.innerHTML =
+        '<rect x="26" y="'+top+'" width="260" height="38" rx="6" fill="#FFE1F2" stroke="#FF8FC4" stroke-width="1.5"/>' +
+        '<text class="nowplaying-glow" x="34" y="'+(top+16)+'" font-size="11" fill="#D6418F">▶</text>' +
+        '<text x="50" y="'+(top+16)+'" font-size="11" font-weight="bold" fill="#A8347A">'+t.artist+'</text>' +
+        '<text x="50" y="'+(top+30)+'" font-size="10" fill="#C25FA0">'+t.title+'</text>' +
+        '<text x="280" y="'+(top+16)+'" font-size="8" fill="#C25FA0" text-anchor="end">NOW PLAYING</text>' +
+        '<text x="280" y="'+(top+30)+'" font-size="9" fill="#C25FA0" text-anchor="end">'+dur+'</text>';
+    } else {
+      g.innerHTML =
+        '<text x="34" y="'+(top+10)+'" font-size="11" fill="#9A86C0">'+(i+1)+'.</text>' +
+        '<text x="50" y="'+(top+10)+'" font-size="11" fill="#5C4878">'+t.artist+'</text>' +
+        '<text x="50" y="'+(top+24)+'" font-size="10" fill="#8A78A8">'+t.title+'</text>' +
+        '<text x="280" y="'+(top+10)+'" font-size="9" fill="#9A86C0" text-anchor="end">'+dur+'</text>' +
+        (i < tracks.length-1 ? '<line x1="26" y1="'+(top+34)+'" x2="286" y2="'+(top+34)+'" stroke="#E8D6F2" stroke-width="1"/>' : '');
+    }
+    g.addEventListener('click', function(){ loadTrack(i); scrollToCurrent(); });
+    rowsEl.appendChild(g);
+  });
+  applyScroll();
+}
+
+function updateAll(){
+  document.getElementById('marqueeText').textContent =
+    '♪ ' + tracks[current].artist + ' — ' + tracks[current].title + ' ♪\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
+
+  document.querySelectorAll('.bar').forEach(function(b){ b.classList.toggle('paused', !playing); });
+  document.getElementById('spinDisc').classList.toggle('paused', !playing);
+
+  var playIcon = document.getElementById('playIcon');
+  if(playing){
+    playIcon.setAttribute('d', 'M70,129 L70,147 L86,138 Z');
+  } else {
+    playIcon.setAttribute('d', 'M70,129 L74,129 L74,147 L70,147 Z M78,129 L82,129 L82,147 L78,147 Z');
+  }
+  renderPlaylist();
+}
+
+/* ================== YouTube IFrame Player ================== */
+var ytPlayer = null;
+var ytReady = false;
+var seekDragging = false; // declared early so loadTrack() can reference it safely
+
+function onYouTubeIframeAPIReady(){
+  ytPlayer = new YT.Player('ytHiddenPlayer', {
+    height: '1', width: '1',
+    videoId: tracks[current].videoId,
+    playerVars: { autoplay: 0, controls: 0, disablekb: 1, modestbranding: 1 },
+    events: {
+      onReady: function(){
+        ytReady = true;
+        ytPlayer.setVolume(65);
+        prefetchDurations(0);
+      },
+      onStateChange: function(e){
+        if(e.data === YT.PlayerState.ENDED){
+          document.getElementById('btnNext').click();
+        }
+        if(e.data === YT.PlayerState.PLAYING){
+          var d = ytPlayer.getDuration();
+          if(d) durationCache[current] = fmtTime(d);
+          playing = true; updateAll();
+        }
+        if(e.data === YT.PlayerState.PAUSED){
+          playing = false; updateAll();
+        }
+      }
+    }
+  });
+}
+(function loadYT(){
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+})();
+
+function loadTrack(i){
+  current = i;
+  if(ytReady){
+    ytPlayer.loadVideoById(tracks[i].videoId);
+    ytPlayer.playVideo();
+  }
+  playing = true;
+  updateAll();
+}
+
+/* Silently cues every track once (no audio, no visible playback) just to
+   read its real duration from YouTube, then restores whatever track the
+   user actually has selected. This is why all 9 times can show up right
+   away instead of only appearing after you've clicked into each one. */
+function prefetchDurations(idx){
+  if(idx >= tracks.length){
+    ytPlayer.cueVideoById(tracks[current].videoId); // restore selection when done
+    return;
+  }
+  if(durationCache[idx]){ prefetchDurations(idx + 1); return; }
+  ytPlayer.cueVideoById(tracks[idx].videoId);
+  var tries = 0;
+  var poll = setInterval(function(){
+    tries++;
+    var d = ytPlayer.getDuration();
+    if(d > 0 || tries > 20){
+      if(d > 0){ durationCache[idx] = fmtTime(d); renderPlaylist(); }
+      clearInterval(poll);
+      prefetchDurations(idx + 1);
+    }
+  }, 150);
+}
+
+document.getElementById('btnPlay').addEventListener('click', function(){
+  if(ytReady) ytPlayer.playVideo();
+  playing = true; updateAll();
+});
+document.getElementById('btnPause').addEventListener('click', function(){
+  if(ytReady) ytPlayer.pauseVideo();
+  playing = false; updateAll();
+});
+document.getElementById('btnNext').addEventListener('click', function(){
+  loadTrack((current + 1) % tracks.length);
+});
+document.getElementById('btnPrev').addEventListener('click', function(){
+  loadTrack((current - 1 + tracks.length) % tracks.length);
+});
+
+/* draggable seek bar — now seeks the real video */
+var svgEl = document.querySelector('svg');
+function clientToSvgX(clientX){
+  var rect = svgEl.getBoundingClientRect();
+  return (clientX - rect.left) * (320 / rect.width);
+}
+var seekHandle = document.getElementById('seekHandle');
+var seekFill = document.getElementById('seekFill');
+function setSeek(x){
+  var clamped = Math.max(18, Math.min(302, x));
+  seekHandle.setAttribute('cx', clamped);
+  seekFill.setAttribute('width', clamped - 18);
+  return clamped;
+}
+seekHandle.addEventListener('mousedown', function(){ seekDragging = true; });
+window.addEventListener('mouseup', function(){
+  if(seekDragging && ytReady){
+    var pct = (parseFloat(seekHandle.getAttribute('cx')) - 18) / (302 - 18);
+    ytPlayer.seekTo(pct * ytPlayer.getDuration(), true);
+  }
+  seekDragging = false;
+});
+window.addEventListener('mousemove', function(e){ if(seekDragging) setSeek(clientToSvgX(e.clientX)); });
+seekHandle.addEventListener('touchstart', function(){ seekDragging = true; });
+window.addEventListener('touchend', function(){
+  if(seekDragging && ytReady){
+    var pct = (parseFloat(seekHandle.getAttribute('cx')) - 18) / (302 - 18);
+    ytPlayer.seekTo(pct * ytPlayer.getDuration(), true);
+  }
+  seekDragging = false;
+});
+window.addEventListener('touchmove', function(e){ if(seekDragging && e.touches[0]) setSeek(clientToSvgX(e.touches[0].clientX)); });
+
+/* poll real playback position to drive the seek bar + time readout */
+setInterval(function(){
+  if(!ytReady || !playing || seekDragging) return;
+  var cur = ytPlayer.getCurrentTime();
+  var dur = ytPlayer.getDuration();
+  if(dur > 0){
+    var pct = cur / dur;
+    setSeek(18 + pct * (302 - 18));
+    document.getElementById('timeText').textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
+    if(!durationCache[current]){ durationCache[current] = fmtTime(dur); renderPlaylist(); }
+  }
+}, 500);
+
+/* draggable volume — now controls the real player's volume */
+var volDragging = false;
+var volHandle = document.getElementById('volHandle');
+var volFill = document.getElementById('volFill');
+function setVol(x){
+  var clamped = Math.max(190, Math.min(250, x));
+  volHandle.setAttribute('cx', clamped);
+  volFill.setAttribute('width', clamped - 190);
+  if(ytReady){
+    var pct = (clamped - 190) / (250 - 190);
+    ytPlayer.setVolume(Math.round(pct * 100));
+  }
+}
+volHandle.addEventListener('mousedown', function(){ volDragging = true; });
+window.addEventListener('mouseup', function(){ volDragging = false; });
+window.addEventListener('mousemove', function(e){ if(volDragging) setVol(clientToSvgX(e.clientX)); });
+volHandle.addEventListener('touchstart', function(){ volDragging = true; });
+window.addEventListener('touchend', function(){ volDragging = false; });
+window.addEventListener('touchmove', function(e){ if(volDragging && e.touches[0]) setVol(clientToSvgX(e.touches[0].clientX)); });
+
+renderPlaylist();
+updateAll();
+
+/* playlist scroll: mouse wheel */
+svgEl.addEventListener('wheel', function(e){
+  var rect = svgEl.getBoundingClientRect();
+  var scale = 320 / rect.width;
+  var localX = (e.clientX - rect.left) * scale;
+  var localY = (e.clientY - rect.top) * scale;
+  if(localX >= 18 && localX <= 302 && localY >= 200 && localY <= 390){
+    e.preventDefault();
+    scrollOffset = clampScroll(scrollOffset + e.deltaY * 0.4);
+    applyScroll();
+  }
+}, {passive:false});
+
+/* playlist scroll: click-drag */
+var plDragging = false;
+var plDragStartY = 0;
+var plScrollStart = 0;
+function startPlDrag(clientY){
+  plDragging = true;
+  plDragStartY = clientY;
+  plScrollStart = scrollOffset;
+}
+function movePlDrag(clientY){
+  if(!plDragging) return;
+  var rect = svgEl.getBoundingClientRect();
+  var scale = 430 / rect.height;
+  var deltaY = (clientY - plDragStartY) * scale;
+  scrollOffset = clampScroll(plScrollStart - deltaY);
+  applyScroll();
+}
+document.querySelector('clipPath#playlistClip'); /* noop reference */
+svgEl.addEventListener('mousedown', function(e){
+  var rect = svgEl.getBoundingClientRect();
+  var scale = 320 / rect.width;
+  var localX = (e.clientX - rect.left) * scale;
+  var localY = (e.clientY - rect.top) * (430/rect.height);
+  if(localX >= 18 && localX <= 302 && localY >= 200 && localY <= 390 && !e.target.closest('.track-row')){
+    startPlDrag(e.clientY);
+  }
+});
+window.addEventListener('mousemove', function(e){ movePlDrag(e.clientY); });
+window.addEventListener('mouseup', function(){ plDragging = false; });
+
+</script>
+</body>
+</html>
